@@ -1,0 +1,17 @@
+prev	2	10	prev_2_10
+prev	0	10	prev_0_10
+prev	-1	-1	prev_all
+clin_inc	-1	-1	clin_inc_all
+clin_inc	0	5	clin_inc_0_5
+sev_inc	-1	-1	clin_inc_all
+sev_inc	0	5	clin_inc_0_5
+prop            -1       -1       prop_all
+prop            0       5       prop_0_5
+EIR	-1	-1	EIR
+itn_cov	-1	-1	itn_cov
+
+
+
+
+
+

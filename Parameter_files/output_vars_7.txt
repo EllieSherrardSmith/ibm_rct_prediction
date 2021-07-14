@@ -1,0 +1,12 @@
+prev	4	6	prev_4_6
+prev	2	10	prev_2_10
+prev	0	5	prev_0_5
+prev	0	10	prev_0_10
+clin_inc	0	5	clin_inc_0_5
+clin_inc	0	10	clin_inc_0_10
+clin_inc	2	10	clin_inc_2_10
+clin_inc	5	15	clin_inc_5_15
+clin_inc	-1	-1	clin_inc_all
+EIR	-1	-1	EIR
+itn_cov	-1	-1	itn_cov
+

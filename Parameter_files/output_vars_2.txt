@@ -1,0 +1,26 @@
+prev	0	5	prev_0_5
+prev	2	10	prev_2_10
+prev	0	10	prev_0_10
+prev    -1      -1      prev_all
+pcr_prev 0      5       pcr_prev_0_5
+pcr_prev 2      10       pcr_prev_2_10
+pcr_prev 0      10       pcr_prev_0_10
+pcr_prev -1     -1       pcr_prev_all
+clin_inc	0	5	clin_inc_0_5
+clin_inc	5	15	clin_inc_5_15
+clin_inc	-1	-1	clin_inc_all
+sev_inc	0	5	sev_inc_0_5
+sev_inc	5	15	sev_inc_5_15
+sev_inc	-1	-1	sev_inc_all
+inf_inc	0	5	inf_inc_0_5
+inf_inc	5	15	inf_inc_5_15
+inf_inc	-1	-1	inf_inc_all
+prop      0	5	prop_0_5
+prop	  2	10	prop_2_10
+prop	  0	10	prop_0_10
+prop    -1      -1      prop_all
+EIR	-1	-1	EIR
+itn_cov	-1	-1	itn_cov
+
+
+
