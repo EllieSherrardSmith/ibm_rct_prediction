@@ -1,0 +1,272 @@
+---
+title: "Analysis to complement: Guiding malaria policy and control with mosquito data"
+author: "Ellie Sherrard-Smith"
+date: "July 2021"
+output: pdf_document
+---
+
+### BACKGROUND 
+
+Vector control is a pillar of malaria prevention in endemic settings and generally consists of the use of insecticide treated mosquito nets (ITNs) overnight to protect from night-biting vectors and the application of sprayed insecticides to the walls and ceilings of people’s houses (IRS) to kill mosquitoes resting indoors. Observed long-term trends in disease burden indicate stagnation of malaria control efforts in Africa. This may be associated with reduced per capita protection as the population expands, but a contributing factor is the diminished control from pyrethroid-based vector tools as resistance to the active ingredient often used in nets and sprays proliferates [Hemingway 2016]. The World Health Organization (WHO) has identified ITNs treated with insecticides other than pyrethroids as an unmet public health need.
+
+Any insecticide-treated mosquito net (ITN) must provide a set of data, including from entomological evaluations conducted in the laboratory, to allow an assessment of a product’s safety, quality and entomological efficacy by WHO’s Prequalification Team (PQT) for Vector Control. 
+
+Experimental hut trials have been used by the WHO in early stage product evaluation at least since 2005 [WHO 2005]. Wild, free-flying mosquitoes naturally enter specifically designed houses containing volunteers either protected by the intervention or acting as a control (unprotected or sleeping under an untreated mosquito net). The difference in the number of mosquitoes caught, dying and successfully blood-feeding between intervention and control arms are used to estimate entomological efficacy. Over 136 trials have been conducted using standard methodology in over 33 sites in Africa and beyond. Widely used pyrethroid-only ITNs have two primary modes of action, either killing mosquitoes or preventing them from biting. There is no direct association between these estimates of efficacy in the mosquito and the ITNs ability to reduce malaria as the different effects interact with overall impact depending on the level of ITN use within the community. As such, these tests do not provide information on the effect and duration of the disease impact achieved by new and generally more costly ITNs [Rowland & Protopopoff 2018]. 
+
+Demonstration of public health value requires at least two cluster-randomized control trials (RCTs) for WHO to review the data with a view of developing a policy recommendation. These community-randomized trials need to be relatively large to demonstrate the epidemiological impact of the ITNs and carried out over at least two transmission seasons, with a third intervention year being strongly encouraged but not essential for WHO’s review of the data. This makes evaluation of new ITNs time-consuming, it demands specialized expertise and, unless trials are carefully planned, can delay the time between product development and widespread deployment. 
+
+
+### AIMS
+
+We posit that transmission dynamics mathematical models of falciparum malaria can combine the different actions of ITNs and IRS to translate entomological data from experimental hut trials (and other sources for newer nets) into predictions of epidemiological impact [Churcher et al. 2016; Sherrard-Smith et al. 2018]. The benefit being that these models capture the mechanisms driving malaria transmission so that the local nuances can be somewhat accommodated by parameterizing the model specifically for different locations. 
+
+We systematically review the gold standard RCT data to explore how well this framework is able to predict the public health outcomes of implementing different ITNs or IRS products alone or in combination across multiple ecological settings. Our aim is to provide evidence that local entomological data can be used to parameterize transmission models to demonstrate intervention impacts of vector control in areas where RCTs have not been performed. This can provide evidence for national strategy teams to procure appropriate vector control products. The process will be restricted to those vector control products for which we can reasonably predict public health outcomes observed in gold standard RCTs. Analyses are restricted to ITNs designed to kill host-seeking mosquitoes and so trials of nets which aim to restrict juvenile growth are excluded.
+
+
+
+### EXPLANATION OF THIS REPOSITORY
+
+This repository collates the data from 14 RCTs There are **general_functions** that are used to estimate parameters for respective trials. The input parameters that describe the study specifics and site are provided in **input_files** and **site_files** folders respectively. **Parameter_files** are provided that specify additional important information such as the year of the trial, the age of the cohort tracked for the cross-sectional surveys and the timing of interventions for the model simulations. For each trial, we then provide a **wrapper_function**. This allows the R interface to communicate with the transmission model, run the exe and store the simulated data appropriately. We use the R package MalariaLaunchR, written by Dr Pete Winskill. 
+
+Table 1 below provides brief details of the RCTs included and an ID that is carried through all the files in the folders described above. 
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r table1, echo = FALSE, results = 'asis'}
+
+knitr::kable(read.csv("data/Summary_data_table.csv",header=TRUE),
+             caption = "Table 1: Summary of the Randomised Control Trials included in the systematic review")
+
+```
+
+## SET UP
+
+Previous analyses have indicated that, due to the high variability in the standard bioassays used to assess pyrethroid resistance in local mosquito populations, two functions can reasonably fit to the data. These are the logistic and log-logistic functions. An exploration of systematically reviewed experimental hut data indicates parameter estiamtes from West African design and East African design differ slightly. We explore the resulting predictions when we fit to the global data or each hut design separately. Together this gives us 6 parameter sets:
+
+1. Using the logistic function and global data
+2. Using the logistic function and West African design hut data
+3. Using the logistic function and East African design hut data
+4. Using the log-logistic function and global data
+5. Using the log-logistic function and West African design hut data
+6. Using the log-logistic function and East African design hut data
+
+Within the **general_functions** folder, there is an R script 'functions_ITN_parameter_estimates_options_new_PBO.R' that includes the methods to translate the net type used in a trial into the parameter estimates for the 6 options above. To estimate uncertainty you can use: '0_UNCERTAINTY_EFFICACY_NETS_ESTIMATES_ALL.R'
+
+To include some variability, we simply use the mean parameter values from the fits in Nash et al 2021 and the sweep across a range in the estimated uncertainty for the bioassay measurement. This gives us the major driver for uncertainty but means we do not take uncertainty through from Nash for the specific estimates. 
+
+Initially we need to use the data available from RCT publications and additional data provided by co-authors to estimate model parameters for the model simulations. These details are provided in the accompanying paper [Sherrard-Smith et al 2021 draft].
+
+Within the **input_files** folder, there is an R script for each RCT with a brief synopsis describing how the input data, that specify the study characteristics, are created. Model parameters are collated into the **input_files/data/Model_params** folder for each RCT
+
+Within the **site_files** folder are the site data relating to the particular study administration sub-unit level 1 (province or district level data) where the respective trial arm was performed. This provides baseline and seasonal details for the modelling.
+
+The files within these two folders contain data in the format required to read into the model wrapper function for each trail in the **wrapper_functions** folder. Here, the R scripts relate to the different parameter estimates outlined above (1 to 6) and read in the functions 'functions_validations_netparms[x].R' (x is 1 to 6). These functions use the MalariaLaunchR package (Winskill, 2019) to run the C++ model from the R interface.
+
+The parameter files in **Parameter_files** folder specify the generic model parameters needed for the simulations.
+
+Briefly, the **general_functions** folder holds R scripts recording functions that allow manipulation of the data. Using these we can specify the timing of the interventions (the month and year of implementation), the efficacy of the intervention, the drop out for net use observed across the trial, the levels of pyrethroid resistance noted, the uncertainty in any observations recorded during the trials, and other bespoke information relating to model parameter estimation.
+
+Once a specified RCT is set up in this manner. The model is calibrated to reflect the baseline prevalence observed in that trial arm. This is done by trial and error - altering the *total_M* parameter (in the **input_file**) so that the prevalence at the baseline observation for each trial arm matches that observed by the trial team in pre-intervention baseline surveys. This allows the model simulation to both reflect the seasonal profile of the study site whilst capturing the underlying endemicity.
+
+
+## MODELLING SIMULATIONS
+
+We have previously adjusted a transmission dynamics model for falciparum malaria. The C++ code is published (https://github.com/jamiegriffin/Malaria_simulation). The **wrapper_functions** are specific for each trial and run the model through the R package "MalariaLaunchR" (Winskill 2019). Outputs are not stored in this repo due to size restrictions. 
+
+Summary data are collated to provide estimates for the prevalence, matched for age cohort and the timing of the cross-sectional surveys from the respective trials and the relative efficacy against prevalence where a control arm of an RCT is completed. 
+
+These are provided in **Post_processing/data/DATA_RESOURCE_PREVALENCE_global.csv**
+And in **Post_processing/data/DATA_RESOURCE_EFFICACY_global.csv**
+
+And are also provided in the supplement of the manuscript [add reference].
+
+## References:
+
+Hemingway, J. et al. Averting a malaria disaster: will insecticide resistance derail malaria control? Lancet 387, 1785–1788 (2016)
+
+World Health Organization. Guidelines for laboratory and field testing of long-lasting insecticidal mosquito nets. WHO 2005
+
+Rowland, M. W. & Protopopoff, N. Dawn of the PBO-pyrethroid long lasting net - light at last. Outlooks Pest Manag. 29, 242–244 (2018)
+
+Churcher, T. S., Lissenden, N., Griffin, J. T., Worrall, E. & Ranson, H. The impact of pyrethroid resistance on the efficacy and effectiveness of bednets for malaria control in Africa. Elife 5, (2016)
+
+Sherrard-Smith, E. et al. Systematic review of indoor residual spray efficacy and effectiveness against Plasmodium falciparum in Africa. Nat. Commun. 9, 4982 (2018)
+
+## References noted in the functions folder:
+
+Griffin 2010
+
+Walker 2016
+
+Garske 2013
+
+## Trial data references (RCT number relates to Table 1):
+
+#### RCT 1
+Kleinschmidt, I. et al. 2015. Design of a study to determine the impact of insceticide resistance on malaria vector control: a multi-country investigation. Malaria Journal 14: 282
+
+Kleinschmidt, I. et al. 2018. Implications of insecticide resistance for malaria vector control with long-lasting insecticidal nets: a WHO-coordinated, prospective, international, observational cohort study. Lancet Infectious Diseases 18: 640-649.
+
+Bradley, J. et al. 2016. A cluster randomized trial comparing deltamethrin and bendiocarb as insecticides for indoor residual spraying to control malaria on Bioko Island, Equatorial Guinea. Malaria Journal 15: 539
+
+#### RCT 2
+Alonso, S. et al., 2019. The economic burden of malaria on households and the health system in a high transmission district of Mozambique. Malaria Journal 18: 360
+
+Chaccour C., et al. 2018. Combination of indoor residual spraying with long-lasting insecticide-treated nets for malaria control in Zambezia, Mozambique: a cluster randomised trial and cost-effectiveness study protocol. BMJ Global Health 3: e000610
+
+#### RCT 3
+Corbel V. et al. 2012. Combination of malaria vector control interventions in pyrethroid resistance area in Benin: a cluster randomised controlled trial. Lancet Infectious Diseases 12: 617-626
+
+Corbel V. et al. 2012. Field evaluation of the efficacy of long lasting insecticidal mosquito nets and indoor residual sparying at community level in Southern Benin, West Africa PROTOCOL Lancet infectious diseases
+
+Djenontin, A. et al. 2010. Culicidae diversity, malaria transmission and insecticide resistance alleles in malaria vectors in Ouidah-Kpomasse-Tori district from Benin (West Africa): A pre-intervention study. Parasites & Vectors 3: 83
+
+Moiroux, N. et al. 2012 Dry season determinants of malaria disease and net use in Benin, West Africa. PLoS One 7: e30558
+
+Moiroux, N. et al. 2013. Modelling the risk of being bitten by malaria vectors in a vector control area in southern Benin, west Africa. Parasites & Vectors 6: 71
+
+Moiroux, N. et al. 2014. Spatio-temporal analysis of abundances of three malaria vector species in southern Benin using zero-truncated models. Parasites & Vectors 7: 103
+
+Damien, G.B. et al 2010. Malaria infection and disease in an area with pyrethroid-resistant vectors in southern Benin. Malaria Journal 9: 380
+
+#### RCT 4
+Curtis, C.F. et al. 1998. A comparison of use of a pyrethroid either for house spraying or for bednet treatment against malaria vectors. Tropical Medicine & International Health 3: 619-631
+
+#### RCT 5
+D'Alessandro U., et al. 1995. A comparison of the efficacy of insecticide-treated and untreated bed nets in preventing malaria in Gambian children. Transactions of the Royal Society of Tropical Medicine and Hygiene 89: 596-598.
+
+#### RCT 6
+Henry, M-C. et al. 2005. Protective efficacy of Lambda-cyhalothrin traeted nets in Anopheles gambiae pyrethroid resistance areas of Cote D'Ivoire. Am J Trop Med Hyg 73: 859-864
+
+Chandre, F. et al. 1999. Pyrethroid cross resistance spectrum among populations of Anopheles gambiae s.s from Cote D'Ivoire. Journal of the American Mosquito Control Association 15: 53-59
+
+Betsi, N. et al. 2003. Anopheles funestus (Giles, 1900), la riziculture et la paludisme dans la region forestiere ouest de la Cote d'Ivoire. Cahiers Agricultures 12: 341-346
+
+#### RCT 7
+Bradley, J., et al., 2017. Insecticide-treated nets provide protection against malaria to children in an area of insecticide resistance in Southern Benin. Malaria Journal 16: 225
+
+Ismail B.A., et al. 2017 Temporal and spatial trends in insecticide resistance in Anopheles arabiensis in Sudan: outcomes from an evaluation of implications of insecticide resistance for malaria vector control. Parasite & Vectors 11: 122
+
+Kafy, H.T., 2017. Impact of insecticide resistance in Anopheles arabiensis on malaria incidence and prevalence in Sudan and the costs of mitigation. PNAS 114: E11267-E11275
+
+#### RCT 8
+Gari, T. et al. 2016. Malaria incidence and entomological findings in an area targeted for a cluster-randomized controlled trial to prevent malaria in Ethiopia: results from a pilot study. Malaria Journal 15:145
+
+Kenea O., et al. 2016. Human-biting activities of Anopheles species in south-central Ethiopia. Parasites & Vectors 9: 527
+
+Kenea. O. Thesis. Entomological impact of combined and separate use of indoor residual spraying and long-lasting nets for malaria prevention in Adami Tullu district, South-Central Ethiopia. PhD Thesis Addis Ababa University, Ethiopia 2019
+
+Loha E. et al 2019. Long-lasting insecticidal nets and indoor residual spraying may not be sufficient to eliminate malaria in a low malaria incidence area: results from a cluster randomized controlled trial in Ethiopia . Malaria Journal 18: 141
+
+Solomon, T. et al. 2019. Spatiotemporal clustering of malaria in southern-central Ethiopia: A community-based cohort study. PLoS One 14: e0222986
+
+Deressa W. et al. 2016. Combining long-lasting insecticidal nets and indoor residual spraying for malaria prevention in Ethiopia: study protocol for a cluster randomized controlled trial. Trials 17: 20
+
+Gari,T. et al 2018. Malaria increased the risk of stunting and wasting among young children in Ethiopia: Results of a cohort study. PLoS One 13: e0190983
+
+Hailu, A. et al. 2018. Cost-effectiveness of a combined intervention of long lasting insecticidal nets and indoor residual spraying compared with each intervention alone for malaria prevention in Ethiopia. Cost effectiveness and Resource Allocation 16: 61
+
+Loha, E. et al. 2012. Effect of bednets and indoor residual spraying on spatio-temporal clustering of malaria in a village in South Ethiopia: a longitudinal study. PLoS One 7: e47354
+
+Loha, E. et al. 2012. Predictors of Plasmodium falciparum Malaria Incidence in Chano Mille, South Ethiopia: A Longitudinal Study. Am J Trop Med Hyg 87: 450-459
+
+#### RCT 9
+Magbity, E.B. et al. 1997. Effects of community-wide use of lambdacyhalothrin-impregnated bednets on malaria vectors in rural Sierra Leone. Medical and Veterinary Entomology 11: 79-86.
+
+Marbiah NT, Petersen E, David K, Magbity E, Lines J, Bradley DJ. 1998. A controlled trial of lambda-cyhalothrin-impregnated bed nets and/or Dapsone/Pyrimethamine for malaria control in Sierra Leone. Am J Trop Med Hyg 58: 1 -6
+
+Barnish G, Maude GH, Bockarie MJ, Eggelte TA, Greenwood BM, Ceesay S. 1992. Malaria in a rural area of Sierra Leone. I. Initial results. Annals of Tropical Medicine and parasitology 87: 125-136
+
+Barnish G, Maude GH, Bockarie MJ, Erunkulu OA, Dumbuya MS, Greenwood BM. 1993. Malaria in a rural area of Sierra Leone. II. Parasitological and related results from pre- and post-rains clinical surveys. Annals of Tropical Medicine and parasitology 87: 137 – 148. 
+
+Bockarie MJ, Service MW, Barnish G, Maude GH, Greenwood BM. 1994. Malaria in a rural area of Sierra Leone. III. Vector ecology and disease transmission. Annals of Tropical Medicine and parasitology 88: 251 – 262
+
+#### RCT 10
+Marsh, V.M. et al. 1996. Evaluating the community education programme of an insecticide-treated bed net trial on the Kenyan coast. Health Policy and Planning 11: 280-291
+
+Mbogo, C.N.M. et al. 1996. The impact of permethrin-impregnated bednets on malaria vectors of the Kenyan coast. Medical and Veterinary Entomology 10:251-259
+
+Nevill, C.G. et al. 1996. Insecticide-treated bednets reduce mortality and severe morbidity from malaria among children on the Kenyan coast. Tropical Medicine & International Health 1: 139-146.
+
+Shulman, C.E. et al. 1998. A community randomized controlled trial of insecticide-treated bednets for the prevention of malaria and anaemia among primigravid women on the Kenyan coast. Tropical Medicine & International Health 3: 197-204
+
+Snow, R.W. et al. 1996. Infant parasite rates and immunoglobulin in seroprevalence as a measure of exposure to Plasmodium falciparum during a randomized controlled trial of insecticide-treated bed nets on the Kenyan coast. Am J Trop Med Hyg 55. 144-149
+
+Snow, R.W. et al. 1999. The effect of delivery mechanisms on the uptake of bed net re-impregnation in Kilifi District, Kenya. Health Policy and Planning 14: 18-25
+
+#### RCT 11
+Eisele T.P. et al. 2005. Effect of sustained insecticide-treated bed net use on all-cause child mortality in an area of intense perennial malaria transmission in Western Kenya. Am J Trop Med Hyg 73: 149-156
+
+Gimnig, J.E., Effect of permethrin-treated bed nets on the spatial distribution of malaria vectors in Western Kenya. Am. J Trop Med Hyg. 68: S4: p 115-120
+
+Hawley, W.A., et al. 2003. Community-wide effects of permethrin-treated bed nets on child mortality and malaria morbidity in Western Kenya. Am. J Trop Med Hyg 68: 121-127
+
+Kariuki, S.K. et al. 2003. Effects of permethrin-treated bed-nets on immunity to malaria in western Kenya II. Antibody responses in young children in an area of intense malaria transmission. Am J Trop Med Hyg 68: S108-114.
+
+Ter Kuile,  F.O. et al. 2003. Impact of permetrin-treated bed nets on malaria and all-cause morbidity in young children in an area of intense perennial malaria transmission in Western Kenya: a cross-sectional survey. Am J Trop Med Hyg 68: S4: 100-107
+
+Ter Kuile, F.O. et al. 2003. Reduction of malaria during pregnancy by permethrin-treated bed nets in an area of intense perennial malaria transmission in western Kenya. Am J Trop Med Hyg 68: S50-60
+
+Alaii, J.A., 2003. Community reactions to the introduction of permethrin-treated bed nets for malaria control during a randomized controlled trial in Western Kenya. American Journal of Tropical Medicine and Hygiene 66: S4: p128-136
+
+Alaii, J.A., 2003 Factors affecting use of permethrin-treated bed nets during a randomized controlled trial in Western Kenya. Am. J. Trop. Med. Hyg., 68: S4: 137-141
+
+Alaii, J.A., 2003. Perceptions of bed nets and malaria prevention before and after a randomized controlled trial of permethrin-treated bed nets in Western Kenya. Am. J. Trop. Med. Hyg 68: S4: 142-148
+
+Leenstra, T. et al. 2003. Permethrin-treated bed nets in the prevention of malaria and anemia in adolescent schoolgirls in western Kenya. Am. J Trop Med Hyg 68: S86-93
+
+Lindblade, K.A. et al. 2004. Sustainability of reductions in malaria transmission and infant mortality in Western Kenya with use of insecticide-treated bednets. JAMA 291: 2571-2580
+
+Wiseman, V. et al. 2003. The cost-effectiveness of permethrin-treated bed nets in an area of intense malaria transmission in western Kenya. Am J Trop Med Hyg 68: S161-167
+
+Ter Kuile,  F.O. et al. 2003. Impact of permethrin-treated bed nets on growth, nutritional status, and body composition of primary school children in western Kenya. Am. J Trop Med Hyg 68: S78-85
+
+Phillips-Howard, P.A. et al., 2003. The efficacy of permethrin-treated bed nets on child mortality and morbidity in Western Kenya I. Development of infrastructure and description of study site. Am. J. Trop Med. Hyg. 68: S4: p3-9
+
+Phillips-Howard, P.A. et al., 2003. Efficacy of permethrin-treated bed nets in the prevention of mortality in young children in an area of high perennial malaria transmission in Western Kenya. Am. J. Trop Med Hyg. 68: S4: 23-29
+
+Phillips-Howard, P.A. et al., 2003. Impact of permethrin-treated bed nets on the incidence of sick child visits to peripheral health facilities. Am. J. Trop. Med. Hyg. 68: S4: 38-43
+
+#### RCT 12
+Protopopoff, N. et al. 2018. Effectiveness of a long-lasting piperonyl butoxide-treated insecticidal net and indoor residual spray interventions, separately and together, against malaria transmitted by pyrethroid-resistant mosquitoes: a cluster, randomised controlled, two-by-two factorial design trial. Lancet 391: 1577-1588
+
+Matowo, J. et al. 2015. Trends in the selection of insecticide resistance in Anopheles gambiae s.l. mosquitoes in northwest Tanzania during a community randomized trial of longlasting insecticidal nets and indoor residual spraying. Medical and Veterinary Entomology 29. 51-59. 
+
+#### RCT 13
+Staedke, S. et al 2020. Effect of long-lasting insecticidal nets with and without piperonyl butoxide on malaria indicators in Uganda (LLINEUP): a pragmatic, cluster-randomised trial embedded in a national LLIN distribution campaign. The Lancet 395: 1292-1303. Pre-print accessed 19-02-2020
+
+Gonahasa, S. et al. 2019. LLIN evaluation in Uganda project (LLINEUP) - Impact of long-lasting insecticidal nets with and without, piperonyl butoxide on malaria indicators in Uganda: A cluster-randomized trial. Am. J Trop Med Hyg 101: 531
+
+Gonahasa, S. et al. 2018. LLIN evaluation in Uganda project (LLINEUP): factors associated with ownership and use of long-lasting insecticidal nets in Uganda: a cross-sectional survey of 48 districts. Malaria Journal 17: 421
+
+Lynd, A. et al. 2019. LLIN evaluation in Uganda project (LLINEUP): a cross-sectional survey of species diversity and insecticide resistance in 48 districts of Uganda. Parasites & Vectors 12: 94
+
+Rugnao, S. et al 2019. LLIN evaluation in Uganda project (LLINEUP): factors associated with childhood parasitemia and anaemia 3-years after a national long-lasting insecticidal net distribution campaign: a cross-sectional survey. Malaria Journal 18: 207
+
+Staedke, S. et al 2019 LLIN evaluation in Uganda project (LLINEUP) - Impact of long lasting insecticidal nets with, and without, piperynol butoxide on malaria indicators in Uganda: study protocol for a cluster randomized trial. Trials 20: 321
+
+Okia, M. et al. 2018. Insecticide resistance status of the malaria mosquitoes: Anophleles gambiae and Anopheles funestus in eastern and northern Uganda. Malaria Journal 17: 157
+
+Mawejje, H.D. et al. 2013. Inseciticide resistance monitoring of field-collected Anopheles gambiae s.l. populations from Jinja, eastern Uganda, identifies high levels of pyrethroid resistance. Med Vet Entomol. 27: 276-283
+
+Rubaihayo, J. et al. 2008. Reduced susceptibility to pyrethroid insecticide treated nets by the malaria vector Anopheles gambiae s.l. in western Uganda. Malaria Journal 7: 92
+
+Abeku T.A., et al. 2017. Insecticide resistance patterns in Uganda and the effect of indoor residual spraying with bendiocarb on kdr L1014S frequencies in Anopheles gambiae s.s. Malar J. 16. 156.
+Pre-print accessed 19-02-2020
+
+#### RCT 14
+Protopopoff, N. et al. 2013. High level of resistance in the mosquito Anopheles gambiae to pyrethroid insecticides and reduced susceptibility to bendiocarb in north-western Tanzania. Malaria Journal 12: 149
+
+Protopopoff, N. et al. 2015. Combination of Insecticide Treated Nets and Indoor Residual Spraying in Northern Tanzania Provides Additional Reduction in Vector Population Density and Malaria Transmission Rates Compared to Insecticide Treated Nets Alone: A Randomised Control Trial. PLoS One 10: e0142671
+
+Protopopoff, N. et al. 2015 [correction]. Combination of Insecticide Treated Nets and Indoor Residual Spraying in Northern Tanzania Provides Additional Reduction in Vector Population Density and Malaria Transmission Rates Compared to Insecticide Treated Nets Alone: A Randomised Control Trial. PLoS One 10: e0142671
+
+West, P.A. et al. 2013. Malaria Risk Factors in North West Tanzania: The Effect of Spraying, Nets and Wealth. PLoS One 8: e65767
+
+West, P.A. et al. 2014. Indoor Residual Spraying in Combination with Insecticide-Treated Nets Compared to Insecticide-Treated Nets Alone for Protection against Malaria: A Cluster Randomised Trial in Tanzania. PLoS Medicine 11: e1001630
+
+West, P.A. et al. 2015. Enhanced Protection against Malaria by Indoor Residual Spraying in Addition to Insecticide Treated Nets: Is It Dependent on Transmission Intensity or Net Usage? PLoS One 10: e1=0115661
