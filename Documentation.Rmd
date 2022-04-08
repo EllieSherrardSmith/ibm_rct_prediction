@@ -1,9 +1,13 @@
 ---
-title: "Analysis to complement: Guiding malaria policy and control with mosquito data"
+title: "Analysis to complement: Can mosquito data be used to infer protection from malaria?"
 author: "Ellie Sherrard-Smith"
 date: "July 2021"
 output: pdf_document
 ---
+
+### UPDATES
+
+We are moving to malariasimulation and will add links here for future validations as we iteratively learn more about the efficacy of mosquito vector interventions.
 
 ### BACKGROUND 
 
@@ -58,13 +62,13 @@ Within the **general_functions** folder, there is an R script 'functions_ITN_par
 
 To include some variability, we simply use the mean parameter values from the fits in Nash et al 2021 and the sweep across a range in the estimated uncertainty for the bioassay measurement. This gives us the major driver for uncertainty but means we do not take uncertainty through from Nash for the specific estimates. 
 
-Initially we need to use the data available from RCT publications and additional data provided by co-authors to estimate model parameters for the model simulations. These details are provided in the accompanying paper [Sherrard-Smith et al 2021 draft].
+Initially we need to use the data available from RCT publications and additional data provided by co-authors to estimate model parameters for the model simulations. These details are provided in the accompanying paper [Sherrard-Smith et al 2022 Nat Communs].
 
 Within the **input_files** folder, there is an R script for each RCT with a brief synopsis describing how the input data, that specify the study characteristics, are created. Model parameters are collated into the **input_files/data/Model_params** folder for each RCT
 
 Within the **site_files** folder are the site data relating to the particular study administration sub-unit level 1 (province or district level data) where the respective trial arm was performed. This provides baseline and seasonal details for the modelling.
 
-The files within these two folders contain data in the format required to read into the model wrapper function for each trail in the **wrapper_functions** folder. Here, the R scripts relate to the different parameter estimates outlined above (1 to 6) and read in the functions 'functions_validations_netparms[x].R' (x is 1 to 6). These functions use the MalariaLaunchR package (Winskill, 2019) to run the C++ model from the R interface.
+The files within these two folders contain data in the format required to read into the model wrapper function for each trail in the **wrapper_functions** folder. Here, the R scripts relate to the different parameter estimates outlined above (1 to 6) and read in the functions 'functions_validations_netparms[x].R' (x is 1 to 6). These functions use the MalariaLaunchR package [Winskill, 2019] to run the C++ model from the R interface.
 
 The parameter files in **Parameter_files** folder specify the generic model parameters needed for the simulations.
 
@@ -75,14 +79,14 @@ Once a specified RCT is set up in this manner. The model is calibrated to reflec
 
 ## MODELLING SIMULATIONS
 
-We have previously adjusted a transmission dynamics model for falciparum malaria. The C++ code is published (https://github.com/jamiegriffin/Malaria_simulation). The **wrapper_functions** are specific for each trial and run the model through the R package "MalariaLaunchR" (Winskill 2019). Outputs are not stored in this repo due to size restrictions. 
+We have previously adjusted a transmission dynamics model for falciparum malaria. The C++ code is published (https://github.com/jamiegriffin/Malaria_simulation). The **wrapper_functions** are specific for each trial and run the model through the R package "MalariaLaunchR" [Winskill 2019]. Outputs are not stored in this repo due to size restrictions. 
 
 Summary data are collated to provide estimates for the prevalence, matched for age cohort and the timing of the cross-sectional surveys from the respective trials and the relative efficacy against prevalence where a control arm of an RCT is completed. 
 
 These are provided in **Post_processing/data/DATA_RESOURCE_PREVALENCE_global.csv**
 And in **Post_processing/data/DATA_RESOURCE_EFFICACY_global.csv**
 
-And are also provided in the supplement of the manuscript [add reference].
+And are also provided in the supplement of the manuscript [Supplementary Data, Sherrard-Smith et al. 2022 Nat Communs].
 
 ## References:
 
@@ -95,6 +99,10 @@ Rowland, M. W. & Protopopoff, N. Dawn of the PBO-pyrethroid long lasting net - l
 Churcher, T. S., Lissenden, N., Griffin, J. T., Worrall, E. & Ranson, H. The impact of pyrethroid resistance on the efficacy and effectiveness of bednets for malaria control in Africa. Elife 5, (2016)
 
 Sherrard-Smith, E. et al. Systematic review of indoor residual spray efficacy and effectiveness against Plasmodium falciparum in Africa. Nat. Commun. 9, 4982 (2018)
+
+Sherrard-Smith, E. et al. Can mosquito data be used to infer protection from malaria? Nat Communs
+
+
 
 ## References noted in the functions folder:
 
